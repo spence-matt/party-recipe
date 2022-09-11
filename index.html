@@ -31,6 +31,14 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col">
+                    <div>
+                        <strong>Filter by recipe:</strong>
+                    </div>
+                    <input v-model="recipeNameFilter" placeholder="Enter name of recipe" />
+                </div>
+            </div>
+            <div class="row">
                 <table class="table">
                     <tr class="header">
                         <th style="width:40%;">Recipe</th>
@@ -38,17 +46,17 @@
                         <th style="width:30%;">Allergen</th>
                     </tr>
                     <div >
-                        <tr v-if="recipiesToShow.length != 0" v-for="recipie in recipiesToShow" >
+                        <tr v-if="recipesToShow.length != 0" v-for="recipe in recipesToShow" >
                             <td>
-                                {{recipie.name}}
+                                {{recipe.name}}
                             </td>
                             <td>
-                                <div v-for="ingredient in recipie.ingredients">
+                                <div v-for="ingredient in recipe.ingredients">
                                     {{ingredient}}
                                 </div>
                             </td>
                             <td>
-                                <div v-for="allergen in recipie.allergens">
+                                <div v-for="allergen in recipe.allergens">
                                     {{allergen}}
                                 </div>
                             </td>
@@ -93,7 +101,7 @@
                         allergen: ["Chilli", "Spicy"]
                     }
                 ],
-                recipies: [
+                recipes: [
                     {
                         name: "Lasagne Cup",
                         ingredients: ["Mozzarella Cheese", "Tasty Cheese", "Worcestershire Sauce"]
@@ -104,28 +112,26 @@
                     }
 
                 ],
-                startingRecipieList: [],
-                recipiesToShow: [],
+                startingRecipeList: [],
+                recipesToShow: [],
 
                 checkedAllergens:[],
-                filterQuery: ""
+                recipeNameFilter: ""
             }
           },
           watch:{
             checkedAllergens (newList){
-                this.recipiesToShow = [];
-                this.startingRecipieList.forEach(element => {
-                    const found = newList.some(r=> element.allergens.includes(r))
-                    if (!found || newList.length == 0){
-                        this.recipiesToShow.push(element);
-                    }
-                });
+                this.filterList();
+                
+            },
+            recipeNameFilter(newFilter){
+                this.filterList();
             }
           },
           mounted(){
 
-            this.recipies.forEach(element => {
-                var recipiePlusAllergen = {
+            this.recipes.forEach(element => {
+                var recipePlusAllergen = {
                     name: element.name,
                     ingredients: [],
                     allergens: []
@@ -133,7 +139,7 @@
                 
                 var tempListOfAllegens = [];
                 element.ingredients.forEach(ingredient => {
-                    recipiePlusAllergen.ingredients.push(ingredient);
+                    recipePlusAllergen.ingredients.push(ingredient);
                     var allergens = this.findAllergens(ingredient);
                     if (allergens){
                         allergens.forEach(allergen => {
@@ -144,9 +150,9 @@
                 });
                 
                 let uniqueAllergens = [...new Set(tempListOfAllegens)];
-                recipiePlusAllergen.allergens = uniqueAllergens;
-                this.startingRecipieList.push(recipiePlusAllergen);
-                this.recipiesToShow = this.startingRecipieList;
+                recipePlusAllergen.allergens = uniqueAllergens;
+                this.startingRecipeList.push(recipePlusAllergen);
+                this.recipesToShow = this.startingRecipeList;
             });
 
             this.ingredients.forEach(element => {
@@ -159,6 +165,30 @@
             this.listOfAllegens = [...new Set(this.listOfAllegens)];
           },
           methods: {
+            filterList(){
+                // console.log(this.startingRecipeList);
+                // const result = this.startingRecipeList.filter(recipes.allergens => this.checkedAllergens);
+                // console.log(result);
+                this.recipesToShow = this.startingRecipeList;
+
+                if (this.checkedAllergens.length != 0){
+                    this.checkedAllergens.forEach(element => {
+                        this.recipesToShow = this.recipesToShow.filter(function(obj ) {
+                            return !obj.allergens.includes(element);
+                        });
+                    });
+                }
+
+                if (this.recipeNameFilter){
+                    var filter = this.recipeNameFilter.toUpperCase();
+                    this.recipesToShow = this.recipesToShow.filter(function(obj ) {
+                        let objName = obj.name.toUpperCase();
+                        return objName.indexOf(filter) != -1;
+                    });
+                }
+
+
+            },
             findAllergens(ingredient){
                 var listOfAllegens = [];
                 let obj = this.ingredients.find(o => o.name === ingredient);
