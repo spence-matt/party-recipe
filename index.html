@@ -170,6 +170,15 @@
                 }
             });
             this.listOfAllegens = [...new Set(this.listOfAllegens)];
+
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const recipeFromURL = urlParams.get('recipe');
+            if (recipeFromURL){
+                this.recipeNameFilter = recipeFromURL;
+                this.filterList();
+            }
+
           },
           methods: {
             filterList(){
