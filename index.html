@@ -1,0 +1,183 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@3"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <nav class="navbar bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Belles Party Recipe List</a>
+        </div>
+    </nav>
+    <div id="app" style="padding-top:10px">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <div>
+                        <strong>
+                            Select your allergens:
+                        </strong>
+                    </div>
+                    <span v-for="allergen in listOfAllegens" class="form-check form-check-inline">
+                        <input  class="form-check-input" type="checkbox" :id="allergen" :value="allergen" v-model="checkedAllergens">
+                        <label class="form-check-label" :for="allergen">{{allergen}}</label>
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                <table class="table">
+                    <tr class="header">
+                        <th style="width:40%;">Recipe</th>
+                        <th style="width:30%;">Ingredient</th>
+                        <th style="width:30%;">Allergen</th>
+                    </tr>
+                    <div >
+                        <tr v-if="recipiesToShow.length != 0" v-for="recipie in recipiesToShow" >
+                            <td>
+                                {{recipie.name}}
+                            </td>
+                            <td>
+                                <div v-for="ingredient in recipie.ingredients">
+                                    {{ingredient}}
+                                </div>
+                            </td>
+                            <td>
+                                <div v-for="allergen in recipie.allergens">
+                                    {{allergen}}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr v-else>
+                            <td colspan="3">
+                                Sorry, no food options
+                            </td>
+                        </tr>
+                    </div>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+      
+        createApp({
+          data() {
+            return {
+                listOfAllegens: [],
+                ingredients: [
+                    {
+                        name: "Tasty Cheese",
+                        allergen: ["Dairy"]
+                    },
+                    {
+                        name: "Mozzarella Cheese",
+                        allergen: ["Dairy"]        
+                    },
+                    {
+                        name: "Plain Flour",
+                        allergen: ["Gluten"]
+                    },
+                    {
+                        name: "Milk",
+                        allergen: ["Dairy"]
+                    },
+                    {
+                        name: "Worcestershire Sauce",
+                        allergen: ["Chilli", "Spicy"]
+                    }
+                ],
+                recipies: [
+                    {
+                        name: "Lasagne Cup",
+                        ingredients: ["Mozzarella Cheese", "Tasty Cheese", "Worcestershire Sauce"]
+                    },
+                    {
+                        name: "Cinnamon Scrolls",
+                        ingredients: ["Cinnamon", "Milk"]
+                    }
+
+                ],
+                startingRecipieList: [],
+                recipiesToShow: [],
+
+                checkedAllergens:[],
+                filterQuery: ""
+            }
+          },
+          watch:{
+            checkedAllergens (newList){
+                this.recipiesToShow = [];
+                this.startingRecipieList.forEach(element => {
+                    const found = newList.some(r=> element.allergens.includes(r))
+                    if (!found || newList.length == 0){
+                        this.recipiesToShow.push(element);
+                    }
+                });
+            }
+          },
+          mounted(){
+
+            this.recipies.forEach(element => {
+                var recipiePlusAllergen = {
+                    name: element.name,
+                    ingredients: [],
+                    allergens: []
+                }
+                
+                var tempListOfAllegens = [];
+                element.ingredients.forEach(ingredient => {
+                    recipiePlusAllergen.ingredients.push(ingredient);
+                    var allergens = this.findAllergens(ingredient);
+                    if (allergens){
+                        allergens.forEach(allergen => {
+                            tempListOfAllegens.push(allergen);
+                        });
+                    }
+                    
+                });
+                
+                let uniqueAllergens = [...new Set(tempListOfAllegens)];
+                recipiePlusAllergen.allergens = uniqueAllergens;
+                this.startingRecipieList.push(recipiePlusAllergen);
+                this.recipiesToShow = this.startingRecipieList;
+            });
+
+            this.ingredients.forEach(element => {
+                if (element.allergen){
+                    element.allergen.forEach(allergen => {
+                        this.listOfAllegens.push(allergen);
+                    });
+                }
+            });
+            this.listOfAllegens = [...new Set(this.listOfAllegens)];
+          },
+          methods: {
+            findAllergens(ingredient){
+                var listOfAllegens = [];
+                let obj = this.ingredients.find(o => o.name === ingredient);
+                if (obj && obj.allergen){
+                    return obj.allergen;
+                } else {
+                    return null;
+                }
+            }
+          },
+          filterRecepies(){
+
+            let obj = this.ingredients.find(o => o.name === ingredient);
+
+          }
+
+        }).mount('#app')
+      </script>
+
+
+</body>
+</html>
