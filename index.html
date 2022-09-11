@@ -53,18 +53,18 @@
                                 <th style="width:30%;">Allergen</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="font-size: .75em">
                             <tr v-if="recipesToShow.length != 0" v-for="recipe in recipesToShow" >
                                 <td>
                                     {{recipe.name}}
                                 </td>
                                 <td>
-                                    <div v-for="ingredient in recipe.ingredients">
+                                    <div v-for="ingredient in recipe.ingredients" style="padding-bottom: 5px">
                                         {{ingredient}}
                                     </div>
                                 </td>
                                 <td>
-                                    <div v-for="allergen in recipe.allergens">
+                                    <div v-for="allergen in recipe.allergens" style="padding-bottom: 5px">
                                         {{allergen}}
                                     </div>
                                 </td>
